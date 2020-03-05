@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}
+    Home
+{% endblock %}
+{% block body %}
+    <div class='w3-container'>
+        <h2>Pizza Shop</h2>
+        <table class='w3-table-all'>
+            <tr>
+                <th>Pizza Name</th>
+                <th>Image</th>
+            </tr>
+            {%for entry in data%}
+            <tr>
+                <td>{{entry.name}}</td>
+                <td><img src="{{url_for('static', filename=entry.image_filename)}}" alt="image" width="240"></td>
+            </tr>
+            {%endfor%}
+        </table>
+    </div>
+
+        
+ 
+{% endblock %}
