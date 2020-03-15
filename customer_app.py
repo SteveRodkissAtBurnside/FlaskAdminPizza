@@ -1,5 +1,6 @@
 from flask import Flask, render_template, url_for, request, session, redirect
 from flask_sqlalchemy import SQLAlchemy, Model
+from sqlalchemy import Column, Integer, String, ForeignKey
 from flask_wtf import FlaskForm
 from wtforms.fields import StringField, SubmitField, HiddenField
 from wtforms.validators import DataRequired
@@ -21,24 +22,17 @@ pizza_purchase = db.Table('pizza_purchase',
     db.Column('pizza_id', db.Integer, db.ForeignKey('pizza.id'))
 )
 
-'''
-class PurchaseAmount(db.Model):
-    id = db.Column(db.Integer,primary_key=True),
-    db.Column('purchase_id', db.Integer, db.ForeignKey('purchase.id')),
-    db.Column('pizza_id', db.Integer, db.ForeignKey('pizza.id')),
-    db.Column('amount', db.Integer)
-'''
 
 #the Purchase model- each purchase could be many pizzas and there will be many purchases (so thats why the bridging table is there)
 class Purchase(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30))
-    pizza_purchase = db.relationship('Pizza', secondary=pizza_purchase, backref=db.backref('purchases', lazy='dynamic'))
 
 #the pizza model
 class Pizza(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30))
+    purchases = db.relationship('Purchase', secondary=pizza_purchase , backref=db.backref('pizzas', lazy='dynamic'))
 
 #forms
 class PurchaseForm(FlaskForm):
@@ -70,10 +64,6 @@ def home():
 @app.route('/place_order', methods=['GET','POST'])
 def place_order():
     current_order = Purchase.query.filter_by(id=session['current_order']).first()
-    order = current_order.pizza_purchase
-    print(order.all())
-    for p in order:
-        print(p.name)
     #now set up the ability to add to the purchase
     pizzas = Pizza.query.all()
     form=PizzaForm()
@@ -82,7 +72,7 @@ def place_order():
     return render_template('customer_place_order.html', 
         current_order=current_order, 
         pizzas=pizzas, 
-        form=form)
+        form=form) 
 
 
 @app.route('/add_to_order/<int:id>', methods=['GET','POST'])
@@ -93,9 +83,7 @@ def add_to_order(id):
     if current_order != None:
         #we can add the pizza to the database for this purchase
         pizza = Pizza.query.filter_by(id=id).first()
-        if pizza in current_order.pizza_purchase:
-            print("We have alrady go that one!")
-        current_order.pizza_purchase.append(pizza)
+        current_order.pizzas.append(pizza)
         db.session.commit()
     return redirect(url_for('place_order'))
 

@@ -1,7 +1,7 @@
 {% extends 'customer_base.html' %}
 {% block body %}
     {{ session['current_order']}}
-    {% for pizza in current_order.pizza_purchase %}
+    {% for pizza in current_order.pizzas %}
         <!-- Display the pizza currently in order -->
         {{ pizza.name }}
     {% endfor %}
