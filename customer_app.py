@@ -41,7 +41,6 @@ class PurchaseForm(FlaskForm):
 
 
 class PizzaForm(FlaskForm):
-    pizza_id = HiddenField('pizza_id')
     add_pizza = SubmitField('Add to Order')
 
 @app.route('/', methods=['GET','POST'])

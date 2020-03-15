@@ -10,7 +10,6 @@
     <form action="{{url_for('add_to_order',id=pizza.id)}}" method="post">
             {{form.csrf_token}}
             {{ pizza.name }}
-            {{ form.pizza_id(value=pizza.id) }}
             {{ form.add_pizza }}      
     </form>
     {% endfor %}
