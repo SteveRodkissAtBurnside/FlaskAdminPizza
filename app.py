@@ -1,6 +1,7 @@
 from flask import Flask, render_template, url_for, redirect, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
+from wtforms_sqlalchemy.fields import QuerySelectField
 from flask_wtf.file import FileField, FileRequired
 from wtforms import validators, StringField, SubmitField
 from werkzeug.utils import secure_filename
@@ -27,6 +28,16 @@ class Pizza(db.Model):
     def __repr__(self):
         return self.name
 
+class Order(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    order_name = db.Column(db.String(30))
+    
+
+#the bridging table
+pizza_order = db.Table('pizza_order',
+    db.Column('pizza_id',db.Integer,db.ForeignKey('Pizza.id')),
+    db.Column('order_id',db.Integer,db.ForeignKey('Order.id')))
+
 #the forms that I will need for data input
 #extrnd flaskform so we can use the validators
 class PizzaForm(FlaskForm):
@@ -37,6 +48,19 @@ class PizzaForm(FlaskForm):
 class LoginForm(FlaskForm):
     username = StringField('username', validators=[validators.DataRequired()])
     submit = SubmitField("Login")
+
+def pizza_query():
+    return Pizza.query
+
+def get_pk(obj):
+    return str(obj)
+
+class OrderForm(FlaskForm):
+    order_name = StringField('Name', validators=[validators.DataRequired()])
+    pizza_select = QuerySelectField(query_factory=pizza_query, get_pk=get_pk)
+    submit = SubmitField("Order")
+    finished = SubmitField("Finished")
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -66,12 +90,18 @@ def logout():
     return redirect('/')
     
 
-
 @app.route('/')
 def home():
     data = Pizza.query.all()
     print(data)
     return render_template('index.html', data=data)
+
+
+@app.route('/place_order/', methods=['POST','GET'])
+def place_order():
+    #create the order form
+    order_form = OrderForm()
+    return render_template('order_form.html', form=order_form)
 
 
 

@@ -1,0 +1,9 @@
+{% extends 'customer_base.html' %}
+{% block body %}
+    <form action="" method="post">
+        {{form.csrf_token}}
+        {{form.name.label}}
+        {{form.name}}
+        {{form.submit_order}}
+    </form>
+{% endblock %}

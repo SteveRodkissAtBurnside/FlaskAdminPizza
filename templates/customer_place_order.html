@@ -1,0 +1,17 @@
+{% extends 'customer_base.html' %}
+{% block body %}
+    {{ session['current_order']}}
+    {% for pizza in current_order.pizza_purchase %}
+        <!-- Display the pizza currently in order -->
+        {{ pizza.name }}
+    {% endfor %}
+    <!-- now all the pizzas so we can add them to the order -->
+    {% for pizza in pizzas %}
+    <form action="{{url_for('add_to_order',id=pizza.id)}}" method="post">
+            {{form.csrf_token}}
+            {{ pizza.name }}
+            {{ form.pizza_id(value=pizza.id) }}
+            {{ form.add_pizza }}      
+    </form>
+    {% endfor %}
+{% endblock %}
