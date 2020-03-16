@@ -26,13 +26,14 @@ class PizzaPurchase(db.Model):
 class Purchase(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30))
-    purchases = db.relationship("PizzaPurchase", backref="purchases")
+    purchases = db.relationship("PizzaPurchase", backref="purchase")
 
 #the pizza model
 class Pizza(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30))
-    purchases = db.relationship("PizzaPurchase",backref='pizzas')
+    purchases = db.relationship("PizzaPurchase",backref='pizza')
+
 #forms
 class PurchaseForm(FlaskForm):
     name = StringField('Order Name:',  validators=[DataRequired()])

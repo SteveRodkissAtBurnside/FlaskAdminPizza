@@ -3,7 +3,7 @@
     {{ session['current_order']}}
     {% for entry in current_order %}
         <!-- Display the pizza currently in order -->
-        {{ entry.pizzas.name }}
+        {{ entry.pizza.name }}
     {% endfor %}
     <!-- now all the pizzas so we can add them to the order -->
     {% for pizza in pizzas %}
