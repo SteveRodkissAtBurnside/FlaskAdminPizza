@@ -16,21 +16,23 @@ db = SQLAlchemy(app)
 #data models
 
 #bridging table
-pizza_purchase = db.Table('pizza_purchase',
-    db.Column('purchase_id', db.Integer, db.ForeignKey('purchase.id')),
-    db.Column('pizza_id', db.Integer, db.ForeignKey('pizza.id'))
-)
+
+class PizzaPurchase(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    pizza_id = db.Column(db.Integer, db.ForeignKey('pizza.id'))
+    purchase_id = db.Column(db.Integer, db.ForeignKey('purchase.id'))
 
 #the Purchase model- each purchase could be many pizzas and there will be many purchases (so thats why the bridging table is there)
 class Purchase(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30))
+    purchases = db.relationship("PizzaPurchase", backref="purchase")
 
 #the pizza model
 class Pizza(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30))
-    purchases = db.relationship('Purchase', secondary=pizza_purchase , backref='pizzas')
+    purchases = db.relationship("PizzaPurchase",backref='pizza')
 
 #forms
 class PurchaseForm(FlaskForm):
@@ -60,14 +62,13 @@ def home():
 
 @app.route('/place_order', methods=['GET','POST'])
 def place_order():
-    current_order = Purchase.query.filter_by(id=session['current_order']).first()
-    #now set up the ability to add to the purchase
+    current_order = PizzaPurchase.query.filter_by(purchase_id=session['current_order']).all()
     pizzas = Pizza.query.all()
     form=PizzaForm()
     #this is run after a successful post from customer_home
     #an order has been created and we just want to add pizza's to it!
     return render_template('customer_place_order.html', 
-        current_order=current_order, 
+        current_order=current_order,  
         pizzas=pizzas, 
         form=form) 
 
@@ -75,12 +76,10 @@ def place_order():
 @app.route('/add_to_order/<int:id>', methods=['GET','POST'])
 def add_to_order(id):
     #the pizza form will run this and the form will pass the id of the pizza to add to the order- the current_order is used to check the id of the current order we are processing
-
-    current_order = Purchase.query.filter_by(id=session['current_order']).first()
-    if current_order != None:
+    if session['current_order'] != None:
         #we can add the pizza to the database for this purchase
-        pizza = Pizza.query.filter_by(id=id).first()
-        current_order.pizzas.append(pizza)
+        new_pizza_purchase = PizzaPurchase(pizza_id=id, purchase_id=session['current_order'])
+        db.session.add(new_pizza_purchase)
         db.session.commit()
     return redirect(url_for('place_order'))
 

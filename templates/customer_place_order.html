@@ -1,9 +1,9 @@
 {% extends 'customer_base.html' %}
 {% block body %}
     {{ session['current_order']}}
-    {% for pizza in current_order.pizzas %}
+    {% for entry in current_order %}
         <!-- Display the pizza currently in order -->
-        {{ pizza.name }}
+        {{ entry.pizza.name }}
     {% endfor %}
     <!-- now all the pizzas so we can add them to the order -->
     {% for pizza in pizzas %}
